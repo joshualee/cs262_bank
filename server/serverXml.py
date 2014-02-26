@@ -70,6 +70,24 @@ def validate_request(root):
     return INVALID_REQUEST
   
   return is_valid_opcode(op_code, arg1, arg2)
+    
+def construct_response(op_code, error=None, return_val=None):
+  response_xml = ET.Element('response')
+  header = ET.SubElement(response_xml, 'header')
+  body = ET.SubElement(response_xml, 'body')
 
-def create_response():
-  pass
+  ver_num = ET.SubElement(header, 'ver_num')
+  ver_num.text = S.version
+
+  op_code = ET.SubElement(body, 'op_code')
+  op_code.text = inputs['op_code']
+
+  error_tag = ET.SubElement(body, 'error')
+  if error:
+    error_tag.text = error
+
+  return_val_tag = ET.SubElement(body, 'return_val')
+  if return_val:
+    return_val_tag.text = return_val
+
+  return response_xml
