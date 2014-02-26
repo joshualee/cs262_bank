@@ -1,35 +1,41 @@
 '''
-Created on Feb 18, 2010
+Created on Feb 26, 2014
 
-Altered Feb 20, 2014
+
 '''
 from myServerSend import general_failure, end_session_success,create_success, delete_success,deposit_success,withdraw_success,balance_success
-from struct import unpack
 import sys
+
+# used to take an xml object and return a dictionary, keys = tag and values = text
+def unpack_xml(xml):
+    xml_dict = {}
+    for elem in xml.iter():
+        xml_dict[elem.tag] = elem.text
+    return xml_dict
 
 #create new account
 def create_request(conn,netBuffer,myData,lock):
     
-    values = unpack('!II',netBuffer[6:14])
+    values = unpack_xml(netBuffer)
     
     lock.acquire()
     try:
         #get balance
-        if(values[0] >= 0 and values[0] < sys.maxint):
-            bal = values[0]
+        if(values['arg1'] >= 0 and values['arg1'] < sys.maxint):
+            bal = values['arg1']
         else:
             general_failure(conn, 'create', "invalid balance")
             return
         
         #get account number
-        if values[1] > 0 and values[1] <= 100:
-            act = values[1]
+        if values['arg2'] > 0 and values['arg2'] <= 100:
+            act = values['arg2']
             if act in myData:
                 general_failure(conn, 'create',"account already in use")
                 return
             
         #generate a value if it was -1
-        elif values[1] == -1:
+        elif values['arg2'] == -1:
             i = 1
             while i in myData:
                 i+=1
@@ -51,13 +57,13 @@ def create_request(conn,netBuffer,myData,lock):
 
 #delete an existing account
 def delete_request(conn,netBuffer,myData,lock):
-    values = unpack('!I',netBuffer[6:10])
+    values = unpack_xml(netBuffer)
     
     lock.acquire()
     try:
         #get balance
-        if(values[0] >= 0 and values[0] <= 100):
-            act = values[0]
+        if(values['arg1'] >= 0 and values['arg1'] <= 100):
+            act = values['arg1']
         else:
             general_failure(conn,'delete',"invalid account number")
             return
@@ -80,11 +86,11 @@ def delete_request(conn,netBuffer,myData,lock):
 
 #deposit to an existing account
 def deposit_request(conn,netBuffer,myData,lock):
-    values = unpack('!II',netBuffer[6:14])
+    values = unpack_xml(netBuffer)
     lock.acquire()
     try:
         #get account number
-        if(values[0] >= 0 and values[0] <= 100):
+        if(values['arg1'] >= 0 and values['arg1'] <= 100):
             act = values[0]
         else:
             general_failure(conn,'deposit',"invalid account number")
@@ -96,8 +102,8 @@ def deposit_request(conn,netBuffer,myData,lock):
             return
         
         #check for a valid deposit amount
-        if values[1] > 0:
-            bal = values[1]
+        if values['arg2'] > 0:
+            bal = values['arg2']
         else:
             general_failure(conn,'deposit',"nonsense deposit amount")
             return
@@ -120,12 +126,12 @@ def deposit_request(conn,netBuffer,myData,lock):
 
 #withdraw from an existing account
 def withdraw_request(conn,netBuffer,myData,lock):
-    values = unpack('!II',netBuffer[6:14])
+    values = unpack_xml(netBuffer)
     lock.acquire()
     try:
         #get account number
-        if(values[0] >= 0 and values[0] <= 100):
-            act = values[0]
+        if(values['arg1'] >= 0 and values['arg1'] <= 100):
+            act = values['arg1']
         else:
             general_failure(conn,'withdraw',"invalid account number")
             return
@@ -135,9 +141,9 @@ def withdraw_request(conn,netBuffer,myData,lock):
             general_failure(conn,'withdraw',"nonexistent account number")
             return
         
-        #check for a valid deposit amount
-        if values[1] > 0:
-            bal = values[1]
+        #check for a valid withdraw amount
+        if values['arg2'] > 0:
+            bal = values['arg2']
         else:
             general_failure(conn,'withdraw',"nonsense withdrawal amount")
             return
@@ -159,11 +165,11 @@ def withdraw_request(conn,netBuffer,myData,lock):
 #withdraw from an existing account
 def balance_request(conn,netBuffer,myData,lock):
     #no need to lock: we are just reading a value from a dict, which is thread-safe
-    values = unpack('!I',netBuffer[6:10])
+    values = unpack_xml(netBuffer)
 
     #get balance
-    if(values[0] >= 0 and values[0] <= 100):
-        act = values[0]
+    if(values['arg1'] >= 0 and values['arg1'] <= 100):
+        act = values['arg1']
     else:
         general_failure(conn,'balance',"invalid account number")
         return
