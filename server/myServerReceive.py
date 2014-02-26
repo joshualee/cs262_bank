@@ -27,6 +27,13 @@ def create_request(conn,netBuffer,myData,lock):
             general_failure(conn, 'create', "invalid arguments")
 
         #get balance
+        try:
+          a1 = int(values['arg1'])
+          a2 = int(values['arg2'])
+        except ValueError:
+          general_failure(conn, 'create', "invalid balance")
+          return
+          
         if(values['arg1'] >= 0 and values['arg1'] < sys.maxint):
             bal = int(values['arg1'])
 
