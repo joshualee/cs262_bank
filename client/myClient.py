@@ -4,27 +4,26 @@ Created on Feb 18, 2010
 Altered Feb. 20, 2014
 '''
 
-version = '\x01'
+version = '1.0' # changed 
 
 import socket
 from myClientSend import *
 from myClientReceive import *
 import sys
-from struct import unpack
 
 #opcode associations; note that these opcodes will be returned by the serverzl;khjapoiwpe
-opcodes = {'\x11': create_success,
-           '\x12': general_failure,  
-           '\x21': delete_success,
-           '\x22': general_failure,
-           '\x31': deposit_success,
-           '\x32': general_failure,
-           '\x41': withdraw_success,
-           '\x42': general_failure,
-           '\x51': balance_success,
-           '\x52': general_failure,
-           '\x61': end_session_success,
-           '\x62': unknown_opcode
+opcodes = {'11': create_success,
+           '12': general_failure,  
+           '21': delete_success,
+           '22': general_failure,
+           '31': deposit_success,
+           '32': general_failure,
+           '41': withdraw_success,
+           '42': general_failure,
+           '51': balance_success,
+           '52': general_failure,
+           '61': end_session_success,
+           '62': unknown_opcode
            }
 
 def getInput():
@@ -79,13 +78,14 @@ def getResponse(mySocket):
             
         if len(retBuffer) != 0:
             
-            header = unpack('!cIc',retBuffer[0:6])
-            #only allow correct version numbers
-            if header[0] == version:
-                opcode = header[2]
+
+            root = ET.fromstring(retBuffer)
+
+            if root[0][0].text == version:
+                opcode = root[1][0].text
                 #send packet to correct handler
                 try:
-                    opcodes[opcode](mySocket,retBuffer)
+                    opcodes[opcode](mySocket,root)
                 except KeyError:
                     break
             #mySocket.send ('\x01\x01\x02\x03\x53\x10\x12\x34')

@@ -7,43 +7,37 @@ from struct import unpack
 from sys import exit
 
 #handle errors from server side.
-def general_failure(conn, netBuffer):
-    values = unpack('!h',netBuffer[6:8])
-    strlen = values[0]
-    print "\nERROR: " + netBuffer[8:8+strlen]
+def general_failure(conn, root):
+    print "\nERROR: " + root[1][1]
     return
 
 #create new account
-def create_success(conn, netBuffer):
-    values = unpack('!I',netBuffer[6:10])
-    print "Account creation successful " + str(values[0])
+def create_success(conn, root):
+    print "Account creation successful "+ root[1][1]
     return
 
 #delete an existing account
-def delete_success(conn, netBuffer):
+def delete_success(conn, root):
     print "Account deletion successful"
     return
 
 #deposit to an existing account
-def deposit_success(conn,netBuffer):
-    values = unpack('!I',netBuffer[6:10])
-    print "Deposit success. The updated balance: " + str(values[0])
+def deposit_success(conn,root):
+    print "Deposit success. The updated balance: " + root[1][1]
     return
 
 #withdraw from an existing account
-def withdraw_success(conn,netBuffer):
-    values = unpack('!I',netBuffer[6:10])
-    print "Withdrawal success. The updated balance: " + str(values[0])
+def withdraw_success(conn,root):
+    print "Withdrawal success. The updated balance: " + root[1][1]
     return
 
 #withdraw from an existing account
-def balance_success(conn,netBuffer):
-    values = unpack('!I',netBuffer[6:10])
-    print "The balance of that account is: " + str(values[0])
+def balance_success(conn,root):
+    print "The balance of that account is: " + root[1][1]
     return
 
 #end a session
-def end_session_success(conn,netBuffer):
+def end_session_success(conn,root):
     print "SHUTTING DOWN"
     conn.close()
     exit()
