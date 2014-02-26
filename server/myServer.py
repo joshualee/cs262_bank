@@ -13,15 +13,47 @@ import myServerSend
 from myServerSend import unknown_opcode
 import thread
 
-version = '\x01'
+version = "1.0"
+
+OP_CREATE = 0
+OP_DEPOSIT = 1
+OP_WITHDRAW = 2
+OP_BALANCE = 3
+OP_DELETE = 4
+OP_ENDSESSION = 5
+
 #opcode associations
-opcodes = {'\x10': myServerReceive.create_request, 
-           '\x20': myServerReceive.delete_request,
-           '\x30': myServerReceive.deposit_request,
-           '\x40': myServerReceive.withdraw_request,
-           '\x50': myServerReceive.balance_request,
-           '\x60': myServerReceive.end_session
-           }
+opcodes = {
+    OP_CREATE: myServerReceive.create_request, 
+    OP_DEPOSIT: myServerReceive.delete_request,
+    OP_WITHDRAW: myServerReceive.deposit_request,
+    OP_BALANCE: myServerReceive.withdraw_request,
+    OP_DELETE: myServerReceive.balance_request,
+    OP_ENDSESSION: myServerReceive.end_session
+}
+
+# errors
+NO_ERROR = 0
+GENERAL_FAILURE = 1
+ACCOUNT_NOT_FOUND = 2
+INSUFFICIENT_FUNDS = 3
+EXCEED_MAX_DAILY_WITHDRAWL = 4
+EXCEED_MAX_SINGLE_WITHDRAWL = 5
+INVALID_REQUEST = 6
+UNSUPPORTED_VERSION = 7
+UNKNOWN_OPCODE = 8
+
+# used for error translation
+errors {
+    # NO_ERROR: "no error"
+    INVALID_REQUEST: "Invalid request",  # e.g. invalid XML
+    GENERAL_FAILURE: "Internal server error",
+    UNSUPPORTED_VERSION: "Unsupported protocol version",
+    ACCOUNT_NOT_FOUND: "Account not found",
+    INSUFFICIENT_FUNDS: "Insufficient account funds",
+    EXCEED_MAX_DAILY_WITHDRAWL: "Exceeded maximum amount for a daily withdrawl",
+    EXCEED_MAX_SINGLE_WITHDRAWL: "Exceeded maximum amount for a single withdrawl"
+}
 
 def recordConnect(log, addr):
     print 'Opened connection with ' + addr
@@ -35,31 +67,30 @@ def handler(conn,lock, myData):
     while True:   
         #retrieve header
         try:
-            netbuffer = conn.recv( 1024 )
+            netbuffer = conn.recv(1024)
         except:
             #close the thread if the connection is down
             thread.exit()
-        #if we receive a message...
-        if len(netbuffer) >= 6:
-            #unpack it...
-            header = struct.unpack('!cIc',netbuffer[0:6])
-            #only allow correct version numbers and buffers that are of the appropriate length
-            if header[0] == version and len(netbuffer) == header[1] + 6:
-                opcode = header[2]
-                #try to send packet to correct handler
-                try:
-                    opcodes[opcode](conn,netbuffer,myData,lock)
-                #catch unhandled opcodes
-                except KeyError:
-                    if(second_attempt):
-                        #disconnect the client
-                        myServerSend.end_session_success(conn)
-                        conn.close()
-                        return
-                    else:
-                        #send incorrect opcode message
-                        second_attempt = 1
-                        unknown_opcode(conn)
+                    
+        #unpack message...
+        request = parse_xml(netbuffer)
+        error = validate_request(request)
+        
+        if error == NO_ERROR:        
+            opcode = request.find("body").find("op_code")
+            opcodes[opcode](conn, request, myData, lock)
+        elif error == UNKNOWN_OPCODE:
+            if(second_attempt):
+                #disconnect the client
+                myServerSend.end_session_success(conn)
+                conn.close()
+                return
+            else:
+                #send incorrect opcode message
+                second_attempt = 1
+                unknown_opcode(conn)
+        else:
+            general_failure(conn, error, errors[error])
 
 
 if __name__ == '__main__':
