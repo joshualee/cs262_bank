@@ -15,12 +15,12 @@ import thread
 
 version = "1.0"
 
-OP_CREATE = 0
-OP_DEPOSIT = 1
-OP_WITHDRAW = 2
-OP_BALANCE = 3
-OP_DELETE = 4
-OP_ENDSESSION = 5
+OP_CREATE = 10
+OP_DELETE = 20
+OP_DEPOSIT = 30
+OP_WITHDRAW = 40
+OP_BALANCE = 50
+OP_ENDSESSION = 60
 
 #opcode associations
 opcodes = {
@@ -89,9 +89,6 @@ def handler(conn,lock, myData):
                 #send incorrect opcode message
                 second_attempt = 1
                 unknown_opcode(conn)
-        else:
-            general_failure(conn, error, errors[error])
-
 
 if __name__ == '__main__':
     #set up log

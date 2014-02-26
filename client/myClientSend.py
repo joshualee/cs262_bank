@@ -36,7 +36,7 @@ def create_request(conn):
             act = -1
             break
     
-    send_message(create_xml("1.0","0",str(bal),str(act)),conn)
+    send_message(create_xml("1.0","10",str(bal),str(act)),conn)
     return
 
 #delete an existing account
@@ -53,7 +53,7 @@ def delete_request(conn):
             act = netBuffer
             break
     
-    send_message(create_xml("1.0","1",str(act),""),conn)
+    send_message(create_xml("1.0","20",str(act),""),conn)
     return
 
 #deposit to an existing account
@@ -79,7 +79,7 @@ def deposit_request(conn):
             bal = netBuffer
             break
         
-    send_message(create_xml("1.0","2",str(bal),str(act)),conn)
+    send_message(create_xml("1.0","30",str(bal),str(act)),conn)
     return
 
 #withdraw from an existing account
@@ -106,7 +106,7 @@ def withdraw_request(conn):
             bal = netBuffer
             break
         
-    send_message(create_xml("1.0","3",str(bal),str(act)),conn)
+    send_message(create_xml("1.0","40",str(bal),str(act)),conn)
     return
 
 #withdraw from an existing account
@@ -123,12 +123,12 @@ def balance_request(conn):
             act = netBuffer
             break
 
-    send_message(create_xml("1.0","4",str(act),""),conn)
+    send_message(create_xml("1.0","50",str(act),""),conn)
     return
 
 #end a session
 def end_session(conn):
-    send_message(create_xml("1.0","5","",""),conn)
+    send_message(create_xml("1.0","60","",""),conn)
     return
 
 def send_message(message, conn):

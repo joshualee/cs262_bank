@@ -20,8 +20,6 @@ def general_failure(conn, type, reason):
         op_code = '42'
     elif type == 'balance':
         op_code = '52'
-    else:
-        op_code = '70'
 
     response = construct_response(op_code, error=reason)
     
