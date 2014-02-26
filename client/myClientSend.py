@@ -6,6 +6,7 @@ altered on Feb. 20, 2014
 
 from struct import pack
 from sys import maxint, exit
+import xml.etree.ElementTree as ET
 
 #create new account
 def create_request(conn):
@@ -35,8 +36,7 @@ def create_request(conn):
             act = -1
             break
     
-    send_message('\x01' + pack('!I',8) + '\x10' + pack('!II',bal,act),conn)
-    
+    send_message(create_xml("1.0","0",str(bal),str(act)),conn)
     return
 
 #delete an existing account
@@ -53,7 +53,7 @@ def delete_request(conn):
             act = netBuffer
             break
     
-    send_message('\x01' + pack('!I',4) + '\x20' + pack('!I',act),conn)
+    send_message(create_xml("1.0","1",str(act),""),conn)
     return
 
 #deposit to an existing account
@@ -79,7 +79,7 @@ def deposit_request(conn):
             bal = netBuffer
             break
         
-    send_message('\x01' + pack('!I',8) + '\x30' + pack('!II',act,bal),conn)
+    send_message(create_xml("1.0","2",str(bal),str(act)),conn)
     return
 
 #withdraw from an existing account
@@ -106,7 +106,7 @@ def withdraw_request(conn):
             bal = netBuffer
             break
         
-    send_message('\x01' + pack('!I',8) + '\x40' + pack('!II',act,bal),conn)
+    send_message(create_xml("1.0","3",str(bal),str(act)),conn)
     return
 
 #withdraw from an existing account
@@ -123,12 +123,12 @@ def balance_request(conn):
             act = netBuffer
             break
 
-    send_message('\x01' + pack('!I',4) + '\x50' + pack('!I',act),conn)
+    send_message(create_xml("1.0","4",str(act),""),conn)
     return
 
 #end a session
 def end_session(conn):
-    send_message('\x01\x00\x00\x00\x00\x60',conn)
+    send_message(create_xml("1.0","5","",""),conn)
     return
 
 def send_message(message, conn):
@@ -139,3 +139,28 @@ def send_message(message, conn):
             print "ERROR: connection down"
             exit()
     return
+
+# create an xml object 
+def create_xml(version, code, arg1,arg2):
+
+    request = ET.Element('request')
+    header = ET.SubElement(request, 'header')
+    body = ET.SubElement(request, 'body')
+
+    ver_num = ET.SubElement(header, 'ver_num')
+    ver_num.text = version
+
+    op_code = ET.SubElement(body, 'op_code')
+    op_code.text = code
+
+
+    a1 = ET.SubElement(body, "arg1")
+    a1.text = arg1
+    a2 = ET.SubElement(body, "arg2")
+    a2.text = arg2
+
+    return ET.tostring(request)
+
+
+
+
