@@ -20,6 +20,12 @@ def create_request(conn,netBuffer,myData,lock):
     
     lock.acquire()
     try:
+        try:
+            values['arg1'] = int(values['arg1'])
+            values['arg2'] = int(values['arg2'])
+        except ValueError:
+            general_failure(conn, 'create', "invalid arguments")
+
         #get balance
         try:
           a1 = int(values['arg1'])
@@ -29,7 +35,8 @@ def create_request(conn,netBuffer,myData,lock):
           return
           
         if(values['arg1'] >= 0 and values['arg1'] < sys.maxint):
-            bal = values['arg1']
+            bal = int(values['arg1'])
+
         else:
             general_failure(conn, 'create', "invalid balance")
             return
@@ -68,6 +75,12 @@ def delete_request(conn,netBuffer,myData,lock):
     
     lock.acquire()
     try:
+
+        try:
+            values['arg1'] = int(values['arg1'])
+        except ValueError:
+            general_failure(conn, 'create', "invalid arguments")
+            
         #get balance
         if(values['arg1'] >= 0 and values['arg1'] <= 100):
             act = values['arg1']
@@ -96,6 +109,13 @@ def deposit_request(conn,netBuffer,myData,lock):
     values = unpack_xml(netBuffer)
     lock.acquire()
     try:
+
+        try:
+            values['arg1'] = int(values['arg1'])
+            values['arg2'] = int(values['arg2'])
+        except ValueError:
+            general_failure(conn, 'create', "invalid arguments")
+
         #get account number
         if(values['arg1'] >= 0 and values['arg1'] <= 100):
             act = values[0]
@@ -136,6 +156,13 @@ def withdraw_request(conn,netBuffer,myData,lock):
     values = unpack_xml(netBuffer)
     lock.acquire()
     try:
+
+        try:
+            values['arg1'] = int(values['arg1'])
+            values['arg2'] = int(values['arg2'])
+        except ValueError:
+            general_failure(conn, 'create', "invalid arguments")
+
         #get account number
         if(values['arg1'] >= 0 and values['arg1'] <= 100):
             act = values['arg1']
@@ -173,6 +200,11 @@ def withdraw_request(conn,netBuffer,myData,lock):
 def balance_request(conn,netBuffer,myData,lock):
     #no need to lock: we are just reading a value from a dict, which is thread-safe
     values = unpack_xml(netBuffer)
+
+    try:
+            values['arg1'] = int(values['arg1'])
+        except ValueError:
+            general_failure(conn, 'create', "invalid arguments")
 
     #get balance
     if(values['arg1'] >= 0 and values['arg1'] <= 100):
