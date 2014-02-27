@@ -79,7 +79,7 @@ def delete_request(conn,netBuffer,myData,lock):
         try:
             values['arg1'] = int(values['arg1'])
         except ValueError:
-            general_failure(conn, 'create', "invalid arguments")
+            general_failure(conn, 'delete', "invalid arguments")
             
         #get balance
         if(values['arg1'] >= 0 and values['arg1'] <= 100):
@@ -111,14 +111,14 @@ def deposit_request(conn,netBuffer,myData,lock):
     try:
 
         try:
-            values['arg1'] = int(values['arg1'])
-            values['arg2'] = int(values['arg2'])
+            values['arg1'] = int(values['arg1']) # withdraw amount
+            values['arg2'] = int(values['arg2']) # account_number
         except ValueError:
-            general_failure(conn, 'create', "invalid arguments")
+            general_failure(conn, 'deposit', "invalid arguments")
 
         #get account number
-        if(values['arg1'] >= 0 and values['arg1'] <= 100):
-            act = values[0]
+        if(values['arg2'] >= 0 and values['arg2'] <= 100):
+            act = values['arg2']
         else:
             general_failure(conn,'deposit',"invalid account number")
             return
@@ -129,8 +129,8 @@ def deposit_request(conn,netBuffer,myData,lock):
             return
         
         #check for a valid deposit amount
-        if values['arg2'] > 0:
-            bal = values['arg2']
+        if values['arg1'] > 0:
+            bal = values['arg1']
         else:
             general_failure(conn,'deposit',"nonsense deposit amount")
             return
@@ -158,14 +158,14 @@ def withdraw_request(conn,netBuffer,myData,lock):
     try:
 
         try:
-            values['arg1'] = int(values['arg1'])
-            values['arg2'] = int(values['arg2'])
+            values['arg1'] = int(values['arg1']) # withdraw amount
+            values['arg2'] = int(values['arg2']) # account_number
         except ValueError:
-            general_failure(conn, 'create', "invalid arguments")
+            general_failure(conn, 'withdraw', "invalid arguments")
 
         #get account number
-        if(values['arg1'] >= 0 and values['arg1'] <= 100):
-            act = values['arg1']
+        if(values['arg2'] >= 0 and values['arg2'] <= 100):
+            act = values['arg2']
         else:
             general_failure(conn,'withdraw',"invalid account number")
             return
@@ -176,8 +176,8 @@ def withdraw_request(conn,netBuffer,myData,lock):
             return
         
         #check for a valid withdraw amount
-        if values['arg2'] > 0:
-            bal = values['arg2']
+        if values['arg1'] > 0:
+            bal = values['arg1']
         else:
             general_failure(conn,'withdraw',"nonsense withdrawal amount")
             return
@@ -202,9 +202,9 @@ def balance_request(conn,netBuffer,myData,lock):
     values = unpack_xml(netBuffer)
 
     try:
-            values['arg1'] = int(values['arg1'])
-        except ValueError:
-            general_failure(conn, 'create', "invalid arguments")
+        values['arg1'] = int(values['arg1'])
+    except ValueError:
+        general_failure(conn, 'balance', "invalid arguments")
 
     #get balance
     if(values['arg1'] >= 0 and values['arg1'] <= 100):

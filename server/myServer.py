@@ -12,23 +12,24 @@ import myServerReceive
 import myServerSend
 from myServerSend import unknown_opcode
 import thread
+import serverXml as sxml
+import xml.etree.ElementTree as ET
 
-version = "1.0"
-
-OP_CREATE = 10
-OP_DELETE = 20
-OP_DEPOSIT = 30
-OP_WITHDRAW = 40
-OP_BALANCE = 50
-OP_ENDSESSION = 60
+version = '1.0'
+OP_CREATE = '10'
+OP_DELETE = '20'
+OP_DEPOSIT = '30'
+OP_WITHDRAW = '40'
+OP_BALANCE = '50'
+OP_ENDSESSION = '60'
 
 #opcode associations
 opcodes = {
     OP_CREATE: myServerReceive.create_request, 
-    OP_DEPOSIT: myServerReceive.delete_request,
-    OP_WITHDRAW: myServerReceive.deposit_request,
-    OP_BALANCE: myServerReceive.withdraw_request,
-    OP_DELETE: myServerReceive.balance_request,
+    OP_DELETE: myServerReceive.delete_request,
+    OP_DEPOSIT: myServerReceive.deposit_request,
+    OP_WITHDRAW: myServerReceive.withdraw_request,
+    OP_BALANCE: myServerReceive.balance_request,
     OP_ENDSESSION: myServerReceive.end_session
 }
 
@@ -44,7 +45,7 @@ UNSUPPORTED_VERSION = 7
 UNKNOWN_OPCODE = 8
 
 # used for error translation
-errors {
+errors = {
     # NO_ERROR: "no error"
     INVALID_REQUEST: "Invalid request",  # e.g. invalid XML
     GENERAL_FAILURE: "Internal server error",
@@ -71,13 +72,13 @@ def handler(conn,lock, myData):
         except:
             #close the thread if the connection is down
             thread.exit()
-                    
+
         #unpack message...
-        request = parse_xml(netbuffer)
-        error = validate_request(request)
+        request = sxml.parse_xml(netbuffer)
+        error = sxml.validate_request(request)
         
-        if error == NO_ERROR:        
-            opcode = request.find("body").find("op_code")
+        if error == NO_ERROR:
+            opcode = request.find("body").find("op_code").text
             opcodes[opcode](conn, request, myData, lock)
         elif error == UNKNOWN_OPCODE:
             if(second_attempt):
@@ -95,6 +96,8 @@ if __name__ == '__main__':
     log = open('log.txt', 'a')
     #data structure for storing account information
     myData = dict()
+    for i in range(99):
+        myData[i] = 100
 
     #setup socket
     mySocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

@@ -5,7 +5,7 @@ Altered Feb 20, 2014
 '''
 
 from struct import pack
-from serverXml import *
+import serverXml as sxml
 import xml.etree.ElementTree as ET
 
 def general_failure(conn, type, reason):    
@@ -21,7 +21,7 @@ def general_failure(conn, type, reason):
     elif type == 'balance':
         op_code = '52'
 
-    response = construct_response(op_code, error=reason)
+    response = sxml.construct_response(op_code, error=reason)
     
     #encode and send the string
     conn.send(ET.tostring(response))
@@ -29,44 +29,42 @@ def general_failure(conn, type, reason):
 
 #create new account
 def create_success(conn,act):
-    response = construct_response('11', return_val=act)
+    response = sxml.construct_response('11', return_val=str(act))
     conn.send(ET.tostring(response))
     return
 
 #delete an existing account
 def delete_success(conn):
-    response = construct_response('21')
+    response = sxml.construct_response('21')
     conn.send(ET.tostring(response))
     return
 
 #deposit to an existing account
 def deposit_success(conn,bal):
-    response = construct_response('31', return_val=bal)
+    response = sxml.construct_response('31', return_val=str(bal))
     conn.send(ET.tostring(response))
     return
 
 #withdraw from an existing account
 def withdraw_success(conn,bal):
-    response = construct_response('41', return_val=bal)
+    response = sxml.construct_response('41', return_val=str(bal))
     conn.send(ET.tostring(response))
     return
 
 #withdraw from an existing account
 def balance_success(conn,bal):
-    response = construct_response('51', return_val=bal)
+    response = sxml.construct_response('51', return_val=str(bal))
     conn.send(ET.tostring(response))
     return
 
 #end a session
 def end_session_success(conn):
-    response = construct_response('61')
+    response = sxml.construct_response('61')
     conn.send(ET.tostring(response))
     return
 
 #handle invalid opcodes
 def unknown_opcode(conn):
-    response = construct_response('62', error="Unknown opcode")
+    response = sxml.construct_response('62', error="Unknown opcode")
     conn.send(ET.tostring(response))
     return
-
-
