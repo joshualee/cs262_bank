@@ -96,8 +96,6 @@ if __name__ == '__main__':
     log = open('log.txt', 'a')
     #data structure for storing account information
     myData = dict()
-    for i in range(99):
-        myData[i] = 100
 
     #setup socket
     mySocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
